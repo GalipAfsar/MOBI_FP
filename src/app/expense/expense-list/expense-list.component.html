@@ -3,48 +3,52 @@
     <ion-title>Header</ion-title>
   </ion-toolbar>
 </ion-header>
-<ion-content class="ion-padding">
-  <ion-grid>
+<ion-content>
+  <ion-grid class="ion-padding" [formGroup]="searchForm">
     <ion-row>
       <ion-col size="12" size-sm="4">
         <ion-item>
           <ion-icon name="swap-vertical" slot="start"></ion-icon>
-          <ion-select interface="popover" value="Created at (newest first)">
-            <ion-select-option value="Created at (newest first)">Created at (newest first)</ion-select-option>
-            <ion-select-option value="Created at (oldest first)">Created at (oldest first)</ion-select-option>
-            <ion-select-option value="Date (newest first)">Date (newest first)</ion-select-option>
-            <ion-select-option value="Date (oldest first)">Date (oldest first)</ion-select-option>
-            <ion-select-option value="Name (A-Z)">Name (A-Z)</ion-select-option>
-            <ion-select-option value="Name (Z-A)">Name (Z-A)</ion-select-option>
+          <ion-select interface="popover" formControlName="sort">
+            <ion-select-option *ngFor="let sortOption of sortOptions" [value]="sortOption.value">
+              {{ sortOption.label }}
+            </ion-select-option>
           </ion-select>
         </ion-item>
       </ion-col>
       <ion-col size="12" size-sm="4">
         <ion-item>
           <ion-icon name="pricetag" slot="start"></ion-icon>
-          <ion-select interface="popover" placeholder="Category"></ion-select>
+          <ion-select interface="popover" placeholder="Category">
+            <ion-select-option *ngFor="let category of categories" [value]="category.id">
+              {{ category.name }}
+            </ion-select-option>
+          </ion-select>
         </ion-item>
       </ion-col>
       <ion-col size="12" size-sm="4">
         <ion-item>
           <ion-icon name="search" slot="start"></ion-icon>
-          <ion-input [clearInput]="true" placeholder="Search"></ion-input>
+          <ion-input maxlength="40" placeholder="Search" [clearInput]="true" formControlName="name"></ion-input>
         </ion-item>
       </ion-col>
     </ion-row>
   </ion-grid>
+
   <ion-list>
     <ion-item>
       <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
       <ion-label>No expenses found</ion-label>
     </ion-item>
   </ion-list>
+
   <ion-fab slot="fixed" vertical="bottom" horizontal="end">
     <ion-fab-button (click)="openModal()">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
   </ion-fab>
 </ion-content>
+
 <ion-footer>
   <ion-toolbar>
     <ion-buttons slot="start">

@@ -1,25 +1,77 @@
 import { Component } from '@angular/core';
-import { ModalController } from '@ionic/angular';
-import { filter, from } from 'rxjs';
+import { ModalController, RefresherCustomEvent } from '@ionic/angular';
+import { filter, finalize, from } from 'rxjs';
 import { CategoryModalComponent } from '../../category/category-modal/category-modal.component';
 import { ActionSheetService } from '../../shared/service/action-sheet.service';
+import { ToastService } from '../../shared/service/toast.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Category, CategoryCriteria, Expense, ExpenseUpsertDto } from '../../shared/domain';
+import { CategoryService } from '../../category/category.service';
+import { format, formatISO, parseISO } from 'date-fns';
+import { ExpenseService } from '../expense.service';
 
 @Component({
   selector: 'app-expense-modal',
   templateUrl: './expense-modal.component.html',
 })
 export class ExpenseModalComponent {
+  expense: ExpenseUpsertDto = {} as ExpenseUpsertDto;
+  readonly expenseForm: FormGroup;
+  showCategoryForm = false;
+  submitting = false;
+  date: string;
+  categories: Category[] | null = null;
+  readonly initialSort = 'name,asc';
+  lastPageReached = false;
+  loading = false;
+  searchCriteria: CategoryCriteria = { page: 0, size: 25, sort: this.initialSort };
+
   constructor(
     private readonly actionSheetService: ActionSheetService,
     private readonly modalCtrl: ModalController,
-  ) {}
+    private readonly expenseService: ExpenseService,
+    private readonly formBuilder: FormBuilder,
+    private readonly toastService: ToastService,
+    private readonly categoryService: CategoryService,
+  ) {
+    this.expenseForm = this.formBuilder.group({
+      id: [],
+      name: ['', [Validators.required, Validators.maxLength(40)]],
+      amount: ['', Validators.required],
+      categoryId: [''],
+      date: [formatISO(new Date(), { representation: 'date' })],
+    });
+
+    this.loadCategories();
+    this.date = new Date().toISOString();
+  }
 
   cancel(): void {
     this.modalCtrl.dismiss(null, 'cancel');
   }
 
   save(): void {
-    this.modalCtrl.dismiss(null, 'save');
+    this.submitting = true;
+    console.log('Submitting expense data:', {
+      ...this.expenseForm.value,
+      date: formatISO(parseISO(this.expenseForm.value.date), { representation: 'date' }),
+    });
+    this.expenseService
+      .upsertExpense({
+        ...this.expenseForm.value,
+        date: formatISO(parseISO(this.expenseForm.value.date), { representation: 'date' }),
+      })
+      .pipe(finalize(() => (this.submitting = false)))
+      .subscribe({
+        next: () => {
+          this.toastService.displaySuccessToast('Expense saved');
+          this.modalCtrl.dismiss(null, 'refresh');
+        },
+        error: (error: any) => {
+          console.error('Could not save Expense:', error);
+          this.toastService.displayErrorToast('Could not save Expense', error.message);
+        },
+      });
   }
 
   delete(): void {
@@ -33,5 +85,30 @@ export class ExpenseModalComponent {
     categoryModal.present();
     const { role } = await categoryModal.onWillDismiss();
     console.log('role', role);
+  }
+  private loadCategories(next: () => void = () => {}): void {
+    if (!this.searchCriteria.name) delete this.searchCriteria.name;
+    this.loading = true;
+    this.categoryService
+      .getCategories(this.searchCriteria)
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+          next();
+        }),
+      )
+      .subscribe({
+        next: (categories) => {
+          if (this.searchCriteria.page === 0 || !this.categories) this.categories = [];
+          this.categories.push(...categories.content);
+          this.lastPageReached = categories.last;
+        },
+        error: (error) => this.toastService.displayErrorToast('Could not load categories', error),
+      });
+  }
+
+  reloadCategories($event?: any): void {
+    this.searchCriteria.page = 0;
+    this.loadCategories(() => ($event ? ($event as RefresherCustomEvent).target.complete() : {}));
   }
 }
