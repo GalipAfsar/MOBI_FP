@@ -14,8 +14,6 @@ import { ToastService } from '../../shared/service/toast.service';
 export class ExpenseListComponent implements ViewWillEnter {
   readonly initialSort = 'categoryIds,asc';
   date = set(new Date(), { date: 1 });
-  lastPageReached = false;
-  loading = false;
   searchCriteria: ExpenseCriteria = { page: 0, size: 25, sort: this.initialSort };
   categories: Category[] | null = null;
   expenses: Expense[] | null = null;
