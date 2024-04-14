@@ -15,7 +15,6 @@ import { ToastService } from '../../shared/service/toast.service';
 import { formatPeriod } from '../../shared/period';
 import { debounce, finalize, from, groupBy, interval, mergeMap, Subscription, toArray } from 'rxjs';
 import { ExpenseService } from '../expense.service';
-import { id } from 'date-fns/locale';
 
 interface ExpenseGroup {
   date: string;

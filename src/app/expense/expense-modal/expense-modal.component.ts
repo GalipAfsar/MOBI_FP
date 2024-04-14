@@ -17,7 +17,6 @@ import { ExpenseService } from '../expense.service';
 export class ExpenseModalComponent {
   expense: ExpenseUpsertDto = {} as ExpenseUpsertDto;
   readonly expenseForm: FormGroup;
-  showCategoryForm = false;
   submitting = false;
   date: string;
   categories: Category[] = [];
