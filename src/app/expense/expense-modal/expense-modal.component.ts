@@ -5,7 +5,7 @@ import { CategoryModalComponent } from '../../category/category-modal/category-m
 import { ActionSheetService } from '../../shared/service/action-sheet.service';
 import { ToastService } from '../../shared/service/toast.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Category, CategoryCriteria, ExpenseUpsertDto } from '../../shared/domain';
+import { Category, ExpenseUpsertDto } from '../../shared/domain';
 import { CategoryService } from '../../category/category.service';
 import { formatISO, parseISO } from 'date-fns';
 import { ExpenseService } from '../expense.service';
@@ -21,10 +21,6 @@ export class ExpenseModalComponent {
   submitting = false;
   date: string;
   categories: Category[] = [];
-  readonly initialSort = 'name,asc';
-  lastPageReached = false;
-  loading = false;
-  searchCriteria: CategoryCriteria = { page: 0, size: 25, sort: this.initialSort };
 
   constructor(
     private readonly actionSheetService: ActionSheetService,
