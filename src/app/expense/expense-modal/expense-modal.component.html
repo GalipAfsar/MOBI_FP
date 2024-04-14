@@ -31,9 +31,9 @@
     >
       <ion-select-option value="">{{ null }}</ion-select-option>
 
-      <ion-select-option *ngFor="let category of categories" [value]="category.id">
-        {{ category.name }}
-      </ion-select-option>
+      <ion-select-option *ngFor="let category of categories" [value]="category.id">{{
+        category.name
+      }}</ion-select-option>
     </ion-select>
     <ion-button slot="end" (click)="showCategoryModal()">
       <ion-icon slot="icon-only" name="add" role="img"></ion-icon>

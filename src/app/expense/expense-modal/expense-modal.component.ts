@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
-import { ModalController, RefresherCustomEvent } from '@ionic/angular';
+import { ModalController } from '@ionic/angular';
 import { filter, finalize, from } from 'rxjs';
 import { CategoryModalComponent } from '../../category/category-modal/category-modal.component';
 import { ActionSheetService } from '../../shared/service/action-sheet.service';
 import { ToastService } from '../../shared/service/toast.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Category, CategoryCriteria, Expense, ExpenseUpsertDto } from '../../shared/domain';
+import { Category, CategoryCriteria, ExpenseUpsertDto } from '../../shared/domain';
 import { CategoryService } from '../../category/category.service';
-import { format, formatISO, parseISO } from 'date-fns';
+import { formatISO, parseISO } from 'date-fns';
 import { ExpenseService } from '../expense.service';
 
 @Component({
@@ -20,7 +20,7 @@ export class ExpenseModalComponent {
   showCategoryForm = false;
   submitting = false;
   date: string;
-  categories: Category[] | null = null;
+  categories: Category[] = [];
   readonly initialSort = 'name,asc';
   lastPageReached = false;
   loading = false;
@@ -42,7 +42,7 @@ export class ExpenseModalComponent {
       date: [formatISO(new Date(), { representation: 'date' })],
     });
 
-    this.loadCategories();
+    this.loadAllCategories();
     this.date = new Date().toISOString();
   }
 
@@ -86,29 +86,15 @@ export class ExpenseModalComponent {
     const { role } = await categoryModal.onWillDismiss();
     console.log('role', role);
   }
-  private loadCategories(next: () => void = () => {}): void {
-    if (!this.searchCriteria.name) delete this.searchCriteria.name;
-    this.loading = true;
-    this.categoryService
-      .getCategories(this.searchCriteria)
-      .pipe(
-        finalize(() => {
-          this.loading = false;
-          next();
-        }),
-      )
-      .subscribe({
-        next: (categories) => {
-          if (this.searchCriteria.page === 0 || !this.categories) this.categories = [];
-          this.categories.push(...categories.content);
-          this.lastPageReached = categories.last;
-        },
-        error: (error) => this.toastService.displayErrorToast('Could not load categories', error),
-      });
+
+  private loadAllCategories(): void {
+    this.categoryService.getAllCategories({ sort: 'name,asc' }).subscribe({
+      next: (categories) => (this.categories = categories),
+      error: (error) => this.toastService.displayErrorToast('Could not load categories', error),
+    });
   }
 
-  reloadCategories($event?: any): void {
-    this.searchCriteria.page = 0;
-    this.loadCategories(() => ($event ? ($event as RefresherCustomEvent).target.complete() : {}));
+  ionViewWillEnter(): void {
+    this.loadAllCategories();
   }
 }

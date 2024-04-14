@@ -1,6 +1,6 @@
-import { Component, NgIterable } from '@angular/core';
+import { Component } from '@angular/core';
 import { CategoryModalComponent } from '../category-modal/category-modal.component';
-import { InfiniteScrollCustomEvent, ModalController, RefresherCustomEvent } from '@ionic/angular';
+import { InfiniteScrollCustomEvent, ModalController, RefresherCustomEvent, ViewDidLeave } from '@ionic/angular';
 import { Category, CategoryCriteria, SortOption } from '../../shared/domain';
 import { CategoryService } from '../category.service';
 import { ToastService } from '../../shared/service/toast.service';
@@ -11,7 +11,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
   selector: 'app-category-list',
   templateUrl: './category-list.component.html',
 })
-export class CategoryListComponent {
+export class CategoryListComponent implements ViewDidLeave {
   categories: Category[] | null = null;
   readonly initialSort = 'name,asc';
   lastPageReached = false;
