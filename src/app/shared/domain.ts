@@ -48,7 +48,7 @@ export interface AllCategoryCriteria extends SortCriteria {
 // -------
 
 export interface Expense {
-  id: string;
+  id?: string;
   createdAt: string;
   lastModifiedAt: string;
   amount: number;

@@ -15,6 +15,7 @@ import { ToastService } from '../../shared/service/toast.service';
 import { formatPeriod } from '../../shared/period';
 import { debounce, finalize, from, groupBy, interval, mergeMap, Subscription, toArray } from 'rxjs';
 import { ExpenseService } from '../expense.service';
+import { id } from 'date-fns/locale';
 
 interface ExpenseGroup {
   date: string;
@@ -92,7 +93,7 @@ export class ExpenseListComponent implements ViewWillEnter, ViewDidLeave {
     if (!this.searchCriteria.categoryIds?.length) delete this.searchCriteria.categoryIds;
     if (!this.searchCriteria.name) delete this.searchCriteria.name;
     this.loading = true;
-    const groupByDate = this.searchCriteria.sort.startsWith('date');
+    const groupByDate = this.searchCriteria.sort.startsWith('categoryIds');
     this.expenseService
       .getExpenses(this.searchCriteria)
       .pipe(
